@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 
+
 namespace ContosoUniversity.Controllers
 {
     public class StudentsController : Controller
@@ -16,14 +17,28 @@ namespace ContosoUniversity.Controllers
 
         public StudentsController(SchoolContext context)
         {
-            _context = context;    
+            _context = context;
         }
 
         // GET: Students
-        public async Task<IActionResult> Index(string sortOrder, string searchString)
+        public async Task<IActionResult> Index(string sortOrder,
+                                            string currentFilter,
+                                            string searchString,
+                                            int? page)
         {
+            ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+
+            if (searchString != null)
+            {
+                page = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
             ViewData["CurrentFilter"] = searchString;
 
             var students = from s in _context.Students
@@ -48,8 +63,11 @@ namespace ContosoUniversity.Controllers
                     students = students.OrderBy(s => s.LastName);
                     break;
             }
-            return View(await students.AsNoTracking().ToListAsync());
+
+            int pageSize = 3;
+            return View(await PaginatedList<Student>.CreateAsync(students.AsNoTracking(), page ?? 1, pageSize));
         }
+
 
         // GET: Students/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -140,7 +158,7 @@ namespace ContosoUniversity.Controllers
         }
 
         // GET: Students/Delete/5
-        public async Task<IActionResult> Delete(int? id, bool?saveChangesError = false)
+        public async Task<IActionResult> Delete(int? id, bool? saveChangesError = false)
         {
             if (id == null)
             {
@@ -156,12 +174,12 @@ namespace ContosoUniversity.Controllers
                 return NotFound();
             }
 
-            if(saveChangesError.GetValueOrDefault())
+            if (saveChangesError.GetValueOrDefault())
             {
                 ViewData["ErrorMessage"] =
                     "Delete failed. Try again, and if the problem persists see you system administrator.";
             }
-            
+
             return View(student);
         }
 
@@ -173,7 +191,7 @@ namespace ContosoUniversity.Controllers
             var student = await _context.Students
                 .AsNoTracking()
                 .SingleOrDefaultAsync(m => m.ID == id);
-            if(student == null)
+            if (student == null)
             {
                 return RedirectToAction("Index");
             }
@@ -184,13 +202,13 @@ namespace ContosoUniversity.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
-            catch(DbUpdateException)
+            catch (DbUpdateException)
             {
                 return RedirectToAction("Delete", new { id = id, saveChangesError = true });
             }
 
 
-            
+
         }
 
         private bool StudentExists(int id)
