@@ -66,8 +66,7 @@ namespace ContosoUniversity.Controllers
                 _context.Add(course);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
-            }
-            //ViewData["DepartmentID"] = new SelectList(_context.Departments, "DepartmentID", "DepartmentID", course.DepartmentID);
+            }            
             PopulateDepartmentsDropDownList(course.DepartmentID);
             return View(course);
         }
@@ -87,9 +86,7 @@ namespace ContosoUniversity.Controllers
             if (course == null)
             {
                 return NotFound();
-            }
-
-            //ViewData["DepartmentID"] = new SelectList(_context.Departments, "DepartmentID", "DepartmentID", course.DepartmentID);
+            }            
             PopulateDepartmentsDropDownList(course.DepartmentID);
             return View(course);
         }
@@ -97,11 +94,11 @@ namespace ContosoUniversity.Controllers
         // POST: Courses/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+        [HttpPost, ActionName("Edit")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CourseID,Credits,DepartmentID,Title")] Course course)
+        public async Task<IActionResult> EditPost(int? id)
         {
-            if (id != course.CourseID)
+            if (id == null)
             {
                 return NotFound();
             }
@@ -127,7 +124,7 @@ namespace ContosoUniversity.Controllers
             }
 
             PopulateDepartmentsDropDownList(courseToUpdate.DepartmentID);
-            return View(course);
+            return View(courseToUpdate);
         }
 
         // GET: Courses/Delete/5
@@ -142,6 +139,7 @@ namespace ContosoUniversity.Controllers
                 .Include(c=>c.Department)
                 .AsNoTracking()
                 .SingleOrDefaultAsync(m => m.CourseID == id);
+
             if (course == null)
             {
                 return NotFound();
