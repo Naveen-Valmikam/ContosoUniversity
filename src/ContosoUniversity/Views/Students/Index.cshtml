@@ -23,6 +23,9 @@
     <thead>
         <tr>
             <th>
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]"> First Name</a>
+            </th>   
+            <th>
                 <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]" asp-route-currentFilter ="@ViewData["CurrentFilter"]"> Last Name</a>
             </th>       
             <th>
